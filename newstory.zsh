@@ -1,11 +1,11 @@
 function newstory() {
 
-	if [[ $# -lt 4 ]]; then
+	if [[ $# -lt 2 ]]; then
 		echo >&2 `print_usage`
 		exit 1
 	fi
 
-	src=""
+	src="default"
 	newBranch=""
 
 	while [ $# -gt 0 ]
@@ -26,6 +26,11 @@ function newstory() {
 		shift
 	done
 
+	if [[ -z "${newBranch}" ]]; then
+		_gitcli_error "Specify new branch name"
+		exit 1
+	fi
+
 	# find source branch using $src
 	srcBranch=`_gitcli_get_config "story.source.${src}"`
 	if [[ -z "${srcBranch}" ]]; then
@@ -34,7 +39,16 @@ function newstory() {
 	fi
 
 	# fetch most recent changes before doing anything
-	git fetch --all
+	if [[ "${srcBranch}" =~ ([-a-zA-Z0-9]+)/.* ]]; then
+		remote=${BASH_REMATCH[1]}
+		_gitcli_process "Fetching most recent changes from ${remote}"
+		git fetch "${remote}"
+	else
+		_gitcli_process "Fetching most recent changes"
+		git fetch
+	fi
+
+	exit 0
 
 	# create new branch
 	_gitcli_create "${newBranch}" "${srcBranch}"
