@@ -25,7 +25,7 @@ function _gitcli_create() {
 		return 0
 	fi
 
-	_gitcli_fetch_all
+	_gitcli_fetch_by_branch "${srcBranch}"
 
 	_gitcli_process "Creating new branch ${newBranch} from ${srcBranch}"
 
@@ -145,6 +145,19 @@ function _gitcli_open_pr_url() {
 function _gitcli_fetch_all() {
 	_gitcli_process "Fetching all remotes"
 	git fetch --all
+}
+
+function _gitcli_fetch_by_branch() {
+	srcBranch="${1}"
+
+	if [[ "${srcBranch}" =~ ([-a-zA-Z0-9]+)/.* ]]; then
+		remote=${BASH_REMATCH[1]}
+		_gitcli_process "Fetching most recent changes from ${remote}"
+		git fetch "${remote}"
+	else
+		_gitcli_process "Fetching most recent changes"
+		git fetch
+	fi
 }
 
 function _gitcli_create_pr() {

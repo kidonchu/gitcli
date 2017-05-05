@@ -38,18 +38,6 @@ function newstory() {
 		exit 1
 	fi
 
-	# fetch most recent changes before doing anything
-	if [[ "${srcBranch}" =~ ([-a-zA-Z0-9]+)/.* ]]; then
-		remote=${BASH_REMATCH[1]}
-		_gitcli_process "Fetching most recent changes from ${remote}"
-		git fetch "${remote}"
-	else
-		_gitcli_process "Fetching most recent changes"
-		git fetch
-	fi
-
-	exit 0
-
 	# create new branch
 	_gitcli_create "${newBranch}" "${srcBranch}"
 
@@ -58,11 +46,11 @@ function newstory() {
 	_gitcli_checkout "${newBranch}"
 
 	# push to remote
-	_gitcli_process "Pushing to remote target: ${remoteTarget}"
 	remoteTarget=`_gitcli_get_config "story.remotetarget"`
 	if [[ -z "${remoteTarget}" ]]; then
 		remoteTarget="origin"
 	fi
+	_gitcli_process "Pushing to remote target: ${remoteTarget}"
 	git push -u "${remoteTarget}" "${newBranch}"
 }
 
