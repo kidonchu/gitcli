@@ -19,8 +19,8 @@ __base="$(basename ${__file} .zsh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)"
 
 # source common functions
-source ${__dir}/messages.zsh
-source ${__dir}/utils.zsh
+source ${__dir}/messages.sh
+source ${__dir}/utils.sh
 
 # command stored in $1, subcommand stored in $2
 cmd="${1}"
@@ -42,19 +42,19 @@ shift 2
 
 case "${subcmd}" in
 	n | new)
-		source ${__dir}/newstory.zsh
+		source ${__dir}/newstory.sh
 		newstory "$@"
 		;;
 	s | switch)
-		source ${__dir}/switchstory.zsh
+		source ${__dir}/switchstory.sh
 		switchstory "$@"
 		;;
 	pr | pullrequest)
-		source ${__dir}/prstory.zsh
+		source ${__dir}/prstory.sh
 		prstory "$@"
 		;;
 	p | pull)
-		source ${__dir}/pullstory.zsh
+		source ${__dir}/pullstory.sh
 		pullstory "$@"
 		;;
 esac
