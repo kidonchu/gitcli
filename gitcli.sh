@@ -57,6 +57,17 @@ case "${subcmd}" in
 		source ${__dir}/pullstory.sh
 		pullstory "$@"
 		;;
+	r | rebase)
+		source ${__dir}/rebasestory.sh
+		rebasestory "$@"
+		;;
+	d | delete)
+		source ${__dir}/deletestory.sh
+		deletestory "$@"
+		;;
+	*)
+		_gitcli_error "Unsupported subcommand: ${subcmd}"
+		exit 1
 esac
 
 _gitcli_success
