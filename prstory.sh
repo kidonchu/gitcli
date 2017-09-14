@@ -1,10 +1,5 @@
 function prstory() {
 
-	if [[ $# -lt 2 ]]; then
-		print_usage
-		exit 1
-	fi
-
 	src=""
 
 	while [ $# -gt 0 ]
@@ -20,6 +15,11 @@ function prstory() {
 		esac
 		shift
 	done
+
+	# use default src if not specified
+	if [[ -z "${src}" ]]; then
+		src="default"
+	fi
 
 	# find source branch using $src
 	srcBranch=`_gitcli_find_src_branch "${src}"`
