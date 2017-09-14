@@ -100,6 +100,26 @@ function _gitcli_pull() {
 	git pull "${remote}" "${branch}"
 }
 
+function _gitcli_rebase() {
+
+	branch=${1}
+
+	_gitcli_process "Preparing to rebase on ${branch}"
+
+	# check to see if there are things to be stashed
+	hasChanges=`git status -s`
+	if [[ ! -z "${hasChanges}" ]]; then
+		_gitcli_error "You have changes. Resolve them first"
+		exit 1
+	fi
+
+	_gitcli_fetch_by_branch "${srcBranch}"
+
+	_gitcli_process "Rebasing on ${branch}"
+
+	git rebase "${branch}"
+}
+
 function _gitcli_copy_issue_to_clipboard() {
 
 	branch=`_gitcli_current_branch`
@@ -179,8 +199,6 @@ function _gitcli_create_pr() {
 		cmd="${cmd} -H '${header}'"
 	done
 
-	echo "cmd:" $cmd
-
 	title="Title"
 	body="Body"
 	head="kidonchu:test/feature3"
@@ -194,8 +212,6 @@ function _gitcli_create_pr() {
 	repo="test-repo"
 	url=`sprinf "https://api.github.com/repos/%s/%s/pulls" "${owner}" "${repo}"`
 	curl -i -X POST -H 'Authorization: token ' -H 'Content-Type: application/json' -H 'Accept: application/vnd.github.polaris-preview+json' -d '{"title": "Title","base":"master","head":"feature/test3"}' https://api.github.com/repos/kidonchu/test-repo/pulls
-
-	echo "url:" $url
 }
 
 function _gitcli_find_src_branch() {
