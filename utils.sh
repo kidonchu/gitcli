@@ -120,6 +120,50 @@ function _gitcli_rebase() {
 	git rebase "${branch}"
 }
 
+function _gitcli_delete() {
+
+	branch=${1}
+
+	_gitcli_process "Deleting local branch for ${branch}"
+
+	set +e
+	result=`git branch -d "${branch}" 2>&1`
+	set -e
+
+	if [[ "${result}" =~ 'is not fully merged' ]]; then
+		echo
+		# if not fully merged, ask user whether to use force
+		read -p "This branch is not fully merged. Force delete? (nY): " answer
+		answer=${answer:-n}
+		echo "answer:" $answer
+		case "${answer}" in
+			Y)
+				_gitcli_process "***FORCE*** Deleting local branch for ${branch}"
+				git branch -D "${branch}"
+				;;
+			*)
+				_gitcli_process "Exiting without deleting local branch"
+				return 0
+				;;
+		esac
+	fi
+
+	# get name of the remote
+	remote=`_gitcli_get_config branch.${branch}.remote`
+	if [[ -z "$remote" ]]; then
+		_gitcli_process "remote branch was not found for ${branch}"
+		return 0
+	fi
+	if [[ "$remote" != "origin" ]]; then
+		_gitcli_process "remote `${remote}` is not origin for ${branch}"
+		return 0
+	fi
+
+	_gitcli_process "Deleting remote branch for ${branch}"
+
+	git push origin --delete "${branch}"
+}
+
 function _gitcli_copy_issue_to_clipboard() {
 
 	branch=`_gitcli_current_branch`
@@ -128,10 +172,12 @@ function _gitcli_copy_issue_to_clipboard() {
 	if [[ "$branch" =~ $pattern ]]; then
 		# if issue id exists in the branch name, copy to clipboard
 		issueId=${BASH_REMATCH[2]}
-		echo `printf "[DEVJIRA-%s]" ${issueId}` | pbcopy
+		echo `printf "[DEVJIRA-%s]" ${issueId}` | pbcopy &> /dev/null
 	else
 		_gitcli_notice "Unable to extract issue id from ${branch}"
 	fi
+
+	return 0
 }
 
 function _gitcli_open_pr_url() {
