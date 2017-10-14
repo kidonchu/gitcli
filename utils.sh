@@ -67,7 +67,7 @@ function _gitcli_checkout() {
 			if [[ ${stash} == ${laststash} ]]; then
 				break
 			fi
-			((stashIndex++))
+			((stashIndex+=1))
 		done
 
 		_gitcli_process "Popping out stash@{${stashIndex}}"
@@ -124,6 +124,19 @@ function _gitcli_delete() {
 
 	branch=${1}
 
+	# get name of the remote
+	remote=`_gitcli_get_config branch.${branch}.remote`
+	if [[ ! -z "$remote" ]]; then
+		if [[ "$remote" == "origin" ]]; then
+			_gitcli_process "Deleting remote branch for ${branch}"
+			git push origin --delete "${branch}"
+		else
+			_gitcli_process "remote `${remote}` is not origin for ${branch}"
+		fi
+	else
+		_gitcli_process "remote branch was not found for ${branch}"
+	fi
+
 	_gitcli_process "Deleting local branch for ${branch}"
 
 	set +e
@@ -147,21 +160,6 @@ function _gitcli_delete() {
 				;;
 		esac
 	fi
-
-	# get name of the remote
-	remote=`_gitcli_get_config branch.${branch}.remote`
-	if [[ -z "$remote" ]]; then
-		_gitcli_process "remote branch was not found for ${branch}"
-		return 0
-	fi
-	if [[ "$remote" != "origin" ]]; then
-		_gitcli_process "remote `${remote}` is not origin for ${branch}"
-		return 0
-	fi
-
-	_gitcli_process "Deleting remote branch for ${branch}"
-
-	git push origin --delete "${branch}"
 }
 
 function _gitcli_copy_issue_to_clipboard() {
