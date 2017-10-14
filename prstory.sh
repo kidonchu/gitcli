@@ -33,5 +33,5 @@ function prstory() {
 }
 
 function print_usage() {
-	echo "usage: gitcli story pullrequest [-s|--source <source>]"
+	echo "usage: gitcli s|story pr|pullrequest [-s|--source <source>]"
 }
