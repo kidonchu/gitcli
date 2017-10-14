@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # exit if command fails
-set -o errexit
+set -e
 # exit when trying to use undeclared variable
-# set -o nounset
+set -o nounset
 # fail with piped command too
 # set -o pipefail
 
@@ -64,6 +64,10 @@ case "${subcmd}" in
 	d | delete)
 		source ${__dir}/deletestory.sh
 		deletestory "$@"
+		;;
+	o | open)
+		source ${__dir}/openstory.sh
+		openstory "$@"
 		;;
 	*)
 		_gitcli_error "Unsupported subcommand: ${subcmd}"

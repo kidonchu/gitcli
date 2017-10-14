@@ -162,6 +162,18 @@ function _gitcli_delete() {
 	fi
 }
 
+function _gitcli_open() {
+
+	branch=`_gitcli_current_branch`
+	remote=`_gitcli_get_config "branch.${branch}.remote"`
+	url=`_gitcli_get_config "remote.${remote}.url"`
+	url=${url/git@github.com:/https://github.com/}
+	url=${url/.git//tree}
+	url="$url/$branch"
+
+	open "$url"
+}
+
 function _gitcli_copy_issue_to_clipboard() {
 
 	branch=`_gitcli_current_branch`
