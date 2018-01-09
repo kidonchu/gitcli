@@ -36,12 +36,17 @@ function _gitcli_checkout() {
 
 	fromBranch=`_gitcli_current_branch`
 	toBranch=${1}
+	noStash=false
+
+	if [[ $# -gt 1 ]]; then
+		noStash=${2}
+	fi
 
 	_gitcli_process "${fromBranch} => ${toBranch}"
 
 	# check to see if there are things to be stashed
 	hasChanges=`git status -s`
-	if [[ ! -z "${hasChanges}" ]]; then
+	if [[ "${noStash}" = false && ! -z "${hasChanges}" ]]; then
 		_gitcli_process "Stashing changes"
 		# if has something to stash, stash them and store the commit in config
 		git add -A
@@ -62,17 +67,20 @@ function _gitcli_checkout() {
 		_gitcli_process "Preparing to pop out last stash"
 
 		stashIndex=0
-		stashes=`git reflog show stash --pretty=format:%H`
-		for stash in ${stashes}; do
+		stashes=(`git reflog show stash --pretty=format:%H`)
+		for stash in ${stashes[@]}; do
 			if [[ ${stash} == ${laststash} ]]; then
 				break
 			fi
 			((stashIndex+=1))
 		done
 
-		_gitcli_process "Popping out stash@{${stashIndex}}"
+		if [[ $stashIndex -lt ${#stashes[@]} ]]; then
+			_gitcli_process "Popping out stash@{${stashIndex}}"
+			git stash pop "stash@{${stashIndex}}"
+			git reset
+		fi
 
-		git stash pop "stash@{${stashIndex}}"
 		git config "branch.${toBranch}.laststash" ""
 	fi
 }
@@ -131,7 +139,7 @@ function _gitcli_delete() {
 			_gitcli_process "Deleting remote branch for ${branch}"
 			git push origin --delete "${branch}"
 		else
-			_gitcli_process "remote `${remote}` is not origin for ${branch}"
+			_gitcli_process "remote '${remote}' is not origin for ${branch}"
 		fi
 	else
 		_gitcli_process "remote branch was not found for ${branch}"
@@ -177,7 +185,7 @@ function _gitcli_open() {
 function _gitcli_copy_issue_to_clipboard() {
 
 	branch=`_gitcli_current_branch`
-	pattern='^(feature|bugfix)/([0-9]+)(-.*)?'
+	pattern='^([a-zA-Z0-9]+)/([0-9]+)(-.*)?'
 
 	if [[ "$branch" =~ $pattern ]]; then
 		# if issue id exists in the branch name, copy to clipboard
@@ -198,7 +206,7 @@ function _gitcli_open_pr_url() {
 
 	# prepare base information
 	baseRemote=`echo ${base} | cut -d'/' -f 1`
-	baseBranch=`echo ${base} | cut -d'/' -f 2`
+	baseBranch=`echo ${base} | cut -d'/' -f 2,3`
 	baseUri=`_gitcli_get_config "remote.${baseRemote}.url" | sed 's/git@github.com://' | sed 's/\.git//'`
 	baseOwner=`echo ${baseUri} | cut -d'/' -f 1`
 	baseRepo=`echo ${baseUri} | cut -d'/' -f 2`

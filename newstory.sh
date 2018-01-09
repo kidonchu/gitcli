@@ -7,6 +7,7 @@ function newstory() {
 
 	src="default"
 	newBranch=""
+	noStash=false
 
 	while [ $# -gt 0 ]
 	do
@@ -18,6 +19,9 @@ function newstory() {
 			-b | --branch)
 				newBranch=${2}
 				shift
+				;;
+			--no-stash)
+				noStash=true
 				;;
 			*) # unknown flag
 				echo >&2 `print_usage`
@@ -34,8 +38,8 @@ function newstory() {
 	# find source branch using $src
 	srcBranch=`_gitcli_get_config "story.source.${src}"`
 	if [[ -z "${srcBranch}" ]]; then
-		_gitcli_error "Unable to find source branch with ${src}"
-		exit 1
+		_gitcli_notice "Unable to find source branch with ${src}. Using ${src} as-is"
+		srcBranch="${src}"
 	fi
 
 	# create new branch
@@ -43,7 +47,7 @@ function newstory() {
 
 	# checkout new branch
 	_gitcli_process "Checking out new branch"
-	_gitcli_checkout "${newBranch}"
+	_gitcli_checkout "${newBranch}" "${noStash}"
 
 	# push to remote
 	remoteTarget=`_gitcli_get_config "story.remotetarget"`
@@ -55,5 +59,5 @@ function newstory() {
 }
 
 function print_usage() {
-	echo "usage: gitcli story new [-s|--source <source>] [-b|--branch <new_branch>]"
+	echo "usage: gitcli story new [-s|--source <source>] [-b|--branch <new_branch>] [--no-stash]"
 }

@@ -27,7 +27,7 @@ function prstory() {
 	# open browser with PR url
 	_gitcli_open_pr_url "${srcBranch}"
 
-	_gitcli_copy_issue_to_clipboard
+	# _gitcli_copy_issue_to_clipboard
 
 	# _gitcli_create_pr "#{srcBranch}"
 }
