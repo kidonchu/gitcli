@@ -338,7 +338,6 @@ function _gitcli_get_recent_branches() {
 
 function _gitcli_add_recent_branch() {
 	local branch="$1"
-	_gitcli_process "branch: $branch"
 
 	# check if we have `story.recent.total` node already set
 	# if not set, configure total to 0
@@ -347,8 +346,6 @@ function _gitcli_add_recent_branch() {
 	} &> /dev/null
 
 	total=`git config story.recent.total`
-
-	_gitcli_process "total: $total"
 
 	let index=total+1
 	git config "story.recent.l$index" "$branch"

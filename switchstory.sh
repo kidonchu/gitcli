@@ -28,13 +28,22 @@ function switchstory() {
 }
 
 function switch_to_recent() {
-	recentBranch=`_gitcli_get_config story.mostrecent`
-	if [[ -z "${recent}" ]]; then
-		echo >&2 `_gitcli_error "Unable to find most recent branch"`
-		exit 1
+
+	_gitcli_process "Looking for most recent branches"
+
+	branches=(`_gitcli_get_recent_branches`)
+	toBranch=`_gitcli_choose_one ${branches[@]}`
+
+	if [[ -z "$toBranch" ]]; then
+		_gitcli_process "No recent branch exists"
+		return
 	fi
 
-	_gitcli_checkout "${recentBranch}"
+	_gitcli_checkout "${toBranch}"
+
+	_gitcli_remove_recent_branch_by_name "$toBranch"
+
+	# _gitcli_post_checkout
 }
 
 function switch_to_pattern() {
@@ -62,7 +71,7 @@ function switch_to_pattern() {
 	fi
 
 	# otherwise, display a list of branches for user to choose
-	toBranch=`_gitcli_choose_one ${choices}`
+	toBranch=`_gitcli_choose_one "${choices[@]}"`
 
 	# checkout chosen branch
 	_gitcli_checkout "${toBranch}"

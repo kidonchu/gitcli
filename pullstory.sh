@@ -23,6 +23,10 @@ function pullstory() {
 
 	# find source branch using $src
 	srcBranch=`_gitcli_find_src_branch "${src}"`
+	if [[ -z "${srcBranch}" ]]; then
+		_gitcli_notice "Unable to find source branch with ${src}. Using ${src} as-is"
+		srcBranch="${src}"
+	fi
 
 	# open browser with PR url
 	_gitcli_pull "${srcBranch}"

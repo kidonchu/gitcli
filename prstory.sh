@@ -22,12 +22,16 @@ function prstory() {
 	fi
 
 	# find source branch using $src
-	srcBranch=`_gitcli_find_src_branch "${src}"`
+	srcBranch=`_gitcli_get_config "story.source.${src}"`
+	if [[ -z "${srcBranch}" ]]; then
+		_gitcli_notice "Unable to find source branch with ${src}. Using ${src} as-is"
+		srcBranch="${src}"
+	fi
 
 	# open browser with PR url
 	_gitcli_open_pr_url "${srcBranch}"
 
-	# _gitcli_copy_issue_to_clipboard
+	_gitcli_copy_issue_to_clipboard
 
 	# _gitcli_create_pr "#{srcBranch}"
 }
