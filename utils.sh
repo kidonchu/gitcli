@@ -60,6 +60,9 @@ function _gitcli_checkout() {
 	git config story.mostrecent "${fromBranch}"
 	git checkout ${toBranch}
 
+	_gitcli_process "Adding $fromBranch to recent branches list"
+	_gitcli_add_recent_branch "$fromBranch"
+
 	# if there is last stash for the switched branch, pop that out
 	laststash=`_gitcli_get_config "branch.${toBranch}.laststash"`
 	if [[ ! -z "${laststash}" ]]; then
@@ -98,12 +101,16 @@ function _gitcli_pull() {
 		exit 1
 	fi
 
-	_gitcli_fetch_all
+	# assuming $fromBranch will always be in the form of
+	# <remote>/(feature/bugfix)/branch-name
+	remote=`echo ${fromBranch} | cut -d'/' -f 1`
+	branch=`echo ${fromBranch} | cut -d'/' -f 2,3`
+
+	_gitcli_process "Fetching from ${remote}"
+
+	git fetch $remote
 
 	_gitcli_process "Pulling from ${fromBranch}"
-
-	remote=`echo ${fromBranch} | cut -d'/' -f 1`
-	branch=`echo ${fromBranch} | cut -d'/' -f 2`
 
 	git pull "${remote}" "${branch}"
 }
@@ -185,12 +192,13 @@ function _gitcli_open() {
 function _gitcli_copy_issue_to_clipboard() {
 
 	branch=`_gitcli_current_branch`
-	pattern='^([a-zA-Z0-9]+)/([0-9]+)(-.*)?'
+	pattern='^([a-zA-Z0-9]+)/([[:alpha:]]+-[0-9]+)(-.*)?'
 
 	if [[ "$branch" =~ $pattern ]]; then
 		# if issue id exists in the branch name, copy to clipboard
 		issueId=${BASH_REMATCH[2]}
-		echo `printf "[DEVJIRA-%s]" ${issueId}` | pbcopy &> /dev/null
+		issueId=`echo $issueId | awk '{print toupper($0)}'`
+		echo `printf "[%s]" ${issueId}` | pbcopy &> /dev/null
 	else
 		_gitcli_notice "Unable to extract issue id from ${branch}"
 	fi
@@ -293,7 +301,7 @@ function _gitcli_find_src_branch() {
 
 function _gitcli_choose_one() {
 
-	choices=${1}
+	choices=("$@")
 
 	PS3=">>> Choose one: "
 	select choice in "${choices[@]}"
@@ -306,3 +314,119 @@ function _gitcli_choose_one() {
 		esac
 	done
 }
+
+function _gitcli_post_checkout() {
+	echo "hi" > /dev/null
+	# cp $HOME/vagrant/dev/hosted/config/env_kchu.php $HOME/vagrant/dev/hosted/config/env_dev.php
+	# cd $HOME/vagrant/dev/hosted/admin/svg
+	# ln -sfn ../../../ember-app/dist/assets/svg/sprite.symbol.svg .
+}
+
+function _gitcli_get_recent_branches() {
+
+	items=()
+
+	total=`git config story.recent.total`
+	for i in `seq $total 1`
+	do
+		branch=`git config "story.recent.l$i"`
+		items+=("${branch}")
+	done
+
+	echo "${items[@]}"
+}
+
+function _gitcli_add_recent_branch() {
+	local branch="$1"
+	_gitcli_process "branch: $branch"
+
+	# check if we have `story.recent.total` node already set
+	# if not set, configure total to 0
+	{
+		git config story.recent.total || git config story.recent.total 0
+	} &> /dev/null
+
+	total=`git config story.recent.total`
+
+	_gitcli_process "total: $total"
+
+	let index=total+1
+	git config "story.recent.l$index" "$branch"
+	git config "story.recent.total" "$index"
+}
+
+function _gitcli_remove_recent_branch() {
+
+	local index="$1"
+	total=`git config story.recent.total`
+
+	_gitcli_process "total: $total"
+
+	if [[ $total > 1 ]]; then
+		for newIndex in `seq $((index)) $((total-1))`
+		do
+			let oldIndex=newIndex+1
+			branch=`git config story.recent.l$oldIndex`
+			git config "story.recent.l$newIndex" "$branch"
+			_gitcli_process "setting story.recent.l$newIndex to $branch"
+		done
+	fi
+
+	git config --unset "story.recent.l$total"
+	git config "story.recent.total" "$((total-1))"
+}
+
+function _gitcli_remove_recent_branch_by_name() {
+
+	local branchToRemove="$1"
+
+	_gitcli_process "Removing $branchToRemove from recent branches list"
+
+	local total=`git config story.recent.total`
+
+	# get recent branches from gitconfig
+	local branches=()
+	for i in `seq 1 $total`; do
+		branches+=(`git config story.recent.l$i`)
+	done
+
+	local index=0
+	for i in "${!branches[@]}"
+	do
+		local branchToCompare="${branches[i]}"
+		if [[ "$branchToCompare" == "$branchToRemove" ]]; then
+			unset 'branches[i]'
+		fi
+	done
+
+	# reorganize indices
+	local newarray=()
+	for branch in "${branches[@]}"; do
+		newarray+=("$branch")
+	done
+	branches=("${newarray[@]}")
+	unset newarray
+
+	# update gitconfig with new list of recent branches
+	local oldTotal="$total"
+	local newTotal=0
+	for i in "${!branches[@]}"; do
+		key="story.recent.l$((i+1))"
+		branch="${branches[i]}"
+		git config "$key" "$branch"
+		let newTotal=newTotal+1
+	done
+	git config "story.recent.total" "$newTotal"
+
+	# cleanup extra items in the recent list
+	for i in `seq $((newTotal+1)) $oldTotal`; do
+		key="story.recent.l$i"
+		git config --unset "$key"
+	done
+}
+
+
+
+
+
+
