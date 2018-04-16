@@ -2,6 +2,8 @@
 source "$__root/src/utils/config.bash"
 # shellcheck source=./utils/remote.bash
 source "$__root/src/utils/remote.bash"
+# shellcheck source=./utils/stash.bash
+source "$__root/src/utils/stash.bash"
 
 function newstory() {
 	
@@ -40,6 +42,12 @@ function newstory() {
 	src=${src:-default}
 	if ! srcBranch="$(get_config "story.source.$src" 2>/dev/null)"; then
 		srcBranch="$src"
+	fi
+
+	# save stash for current branch
+	if ! output=$(save_stash 2>&1); then
+		echo "error: could not save stash for current branch ($output)" >&2
+		return 1
 	fi
 
 	# get remote name from source branch

@@ -53,3 +53,19 @@ function teardown() {
 	run git status -sb
 	[[ "$output" =~ feature/newstory-branch\.\.\.upstream/feature/newstory-branch ]]
 }
+
+@test "it should save current branch's stash before creating new branch" {
+	run touch add c.txt
+
+	run git status
+	[[ "$output" =~ "Untracked files" ]]
+
+	run newstory -b feature/newstory-branch -s upstream/feature/test-branch
+	[ "$status" -eq 0 ]
+
+	run git status
+	[[ "$output" =~ "working tree clean" ]]
+
+	run git config branch.feature/test-branch.laststash
+	[[ "$output" =~ [[:alnum:]]{40} ]]
+}
