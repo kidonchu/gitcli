@@ -60,9 +60,10 @@ function newstory() {
 	_process "new branch: $newBranch"
 	_process "source branch: $srcBranch"
 	_process "remote target: $remoteTarget"
+	_process "no stash: $noStash"
 
 	# save stash for current branch
-	if ! save_stash; then
+	[ ${noStash:-false} = false ] && if ! save_stash; then
 		_error "could not save stash for current branch"
 		return 1
 	fi

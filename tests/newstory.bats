@@ -80,3 +80,19 @@ function teardown() {
 	run git config branch.feature/test-branch.laststash
 	[[ "$output" =~ [[:alnum:]]{40} ]]
 }
+
+@test "it should not stash current branch's changes if --no-stash flag is given" {
+	run touch add c.txt
+
+	run git status
+	[[ "$output" =~ "Untracked files" ]]
+
+	run newstory -b feature/newstory-branch -s upstream/feature/test-branch --no-stash
+	[ "$status" -eq 0 ]
+
+	run git status
+	[[ "$output" =~ "Untracked files" ]]
+
+	run git config branch.feature/test-branch.laststash
+	[ -z "$output" ]
+}
