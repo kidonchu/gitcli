@@ -35,6 +35,8 @@ function teardown() {
 @test "it should create new branch from preconfigured source when source branch is configured" {
 	git config story.source.test upstream/feature/test-branch
 	run newstory -b feature/newstory-branch -s test
+	echo "output:" "$output"
+
 	[ "$status" -eq 0 ]
 	run git rev-parse --abbrev-ref HEAD
 	[ "$output" = "feature/newstory-branch" ]
@@ -47,11 +49,20 @@ function teardown() {
 	[ "$output" = "feature/newstory-branch" ]
 }
 
-@test "it should push to remote after creating a new branch" {
+@test "it should push to default remote target after creating a new branch" {
+	run git config story.remotetarget remote1
 	run newstory -b feature/newstory-branch -s upstream/feature/test-branch
 	[ "$status" -eq 0 ]
 	run git status -sb
-	[[ "$output" =~ feature/newstory-branch\.\.\.upstream/feature/newstory-branch ]]
+	[[ "$output" =~ feature/newstory-branch\.\.\.remote1/feature/newstory-branch ]]
+}
+
+@test "it should push to provided remote target after creating a new branch" {
+	run git config story.remotetarget remote1
+	run newstory -b feature/newstory-branch -s upstream/feature/test-branch -r remote2
+	[ "$status" -eq 0 ]
+	run git status -sb
+	[[ "$output" =~ feature/newstory-branch\.\.\.remote2/feature/newstory-branch ]]
 }
 
 @test "it should save current branch's stash before creating new branch" {
