@@ -4,6 +4,8 @@ source "$__root/src/utils/config.bash"
 source "$__root/src/utils/remote.bash"
 # shellcheck source=./utils/stash.bash
 source "$__root/src/utils/stash.bash"
+# shellcheck source=./utils/message.bash
+source "$__root/src/utils/message.bash"
 
 function newstory() {
 	
@@ -34,7 +36,7 @@ function newstory() {
 	done
 
 	if [[ -z "${newBranch:-}" ]]; then
-		echo "error: new branch name was not provided" >&2
+		_error "new branch name was not provided"
 		return 1
 	fi
 
@@ -55,43 +57,43 @@ function newstory() {
 		fi
 	fi
 
-	echo "new branch: $newBranch"
-	echo "source branch: $srcBranch"
-	echo "remote target: $remoteTarget"
+	_process "new branch: $newBranch"
+	_process "source branch: $srcBranch"
+	_process "remote target: $remoteTarget"
 
 	# save stash for current branch
 	if ! save_stash; then
-		echo "error: could not save stash for current branch" >&2
+		_error "could not save stash for current branch"
 		return 1
 	fi
 
 	# get remote name from source branch
 	if ! remote="$(get_remote_from_branch "$srcBranch" 2>&1)"; then
-		echo "error: could not get remote from source branch '$srcBranch' ($remote)" >&2
+		_error "could not get remote from source branch '$srcBranch' ($remote)"
 		return 1
 	fi
 
 	# fetch most recent remote source
 	if ! git fetch "$remote"; then
-		echo "error: could not fetch from remote '$remote'" >&2
+		_error "could not fetch from remote '$remote'"
 		return 1
 	fi
 
 	# create new branch
 	if ! git branch --no-track "$newBranch" "refs/remotes/$srcBranch"; then
-		echo "error: could not create new branch" >&2
+		_error "could not create new branch"
 		return 1
 	fi
 
 	# checkout new branch
 	if ! git checkout "$newBranch"; then
-		echo "error: could not checkout new branch" >&2
+		_error "could not checkout new branch"
 		return 1
 	fi
 
 	# push new branch to remote
 	if ! git push -u "$remoteTarget" "$newBranch"; then
-		echo "error: could not push '$newBranch' to the remote '$remoteTarget'" >&2
+		_error "could not push '$newBranch' to the remote '$remoteTarget'"
 		return 1
 	fi
 }
