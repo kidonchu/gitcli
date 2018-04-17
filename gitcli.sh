@@ -26,8 +26,8 @@ source ${__srcdir}/messages.sh
 source ${__srcdir}/utils.sh
 
 # command stored in $1, subcommand stored in $2
-cmd="${1}"
-subcmd="${2}"
+cmd="${1:-}"
+subcmd="${2:-}"
 
 if [[ -z "${cmd}" || -z "${subcmd}" ]]; then
 	echo "usage: ${__base} <command> <subcommand> [-r] [file ...]"
@@ -67,10 +67,6 @@ case "${subcmd}" in
 	d | delete)
 		source ${__srcdir}/deletestory.sh
 		deletestory "$@"
-		;;
-	o | open)
-		source ${__srcdir}/openstory.sh
-		openstory "$@"
 		;;
 	*)
 		_gitcli_error "Unsupported subcommand: ${subcmd}"
