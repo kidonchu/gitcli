@@ -35,6 +35,8 @@ function newstory() {
 		shift
 	done
 
+	noStash=${noStash:-false}
+
 	if [[ -z "${newBranch:-}" ]]; then
 		_error "new branch name was not provided"
 		return 1
@@ -63,7 +65,7 @@ function newstory() {
 	_process "no stash: $noStash"
 
 	# save stash for current branch
-	[ ${noStash:-false} = false ] && if ! save_stash; then
+	[ $noStash = false ] && if ! save_stash; then
 		_error "could not save stash for current branch"
 		return 1
 	fi
