@@ -15,6 +15,9 @@ function _setup_git() {
 		git clone --bare "$__tmp_dir" "$__bare__tmp_dir"
 		cd "$__tmp_dir" || return
 		git remote add upstream "$__bare__tmp_dir"
+		git remote add origin "$__bare__tmp_dir"
+		git remote add remote1 "$__bare__tmp_dir"
+		git remote add remote2 "$__bare__tmp_dir"
 		git checkout -b feature/test-branch
 		touch a.txt && run git add a.txt
 		git commit -m "Add a.txt"
