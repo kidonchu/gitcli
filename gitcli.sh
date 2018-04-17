@@ -5,7 +5,9 @@ set -e
 # exit when trying to use undeclared variable
 set -o nounset
 # fail with piped command too
-# set -o pipefail
+set -o pipefail
+
+# set -x
 
 if [ ! -z "${DEBUG_GITCLI-}" ]; then
 	# trace what gets executed
@@ -16,11 +18,12 @@ fi
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .zsh)"
-__root="$(cd "$(dirname "${__dir}")" && pwd)"
+__root="$__dir"
+__srcdir="${__dir}/src"
 
 # source common functions
-source ${__dir}/messages.sh
-source ${__dir}/utils.sh
+source ${__srcdir}/messages.sh
+source ${__srcdir}/utils.sh
 
 # command stored in $1, subcommand stored in $2
 cmd="${1}"
@@ -42,31 +45,31 @@ shift 2
 
 case "${subcmd}" in
 	n | new)
-		source ${__dir}/newstory.sh
-		newstory "$@"
+		source ${__srcdir}/newstory.bash
+		newstory "$@" || exit 1
 		;;
 	s | switch)
-		source ${__dir}/switchstory.sh
-		switchstory "$@"
+		source ${__srcdir}/switchstory.bash
+		switchstory "$@" || exit 1
 		;;
 	pr | pullrequest)
-		source ${__dir}/prstory.sh
-		prstory "$@"
+		source ${__srcdir}/prstory.bash
+		prstory "$@" || exit 1
 		;;
 	p | pull)
-		source ${__dir}/pullstory.sh
+		source ${__srcdir}/pullstory.sh
 		pullstory "$@"
 		;;
 	r | rebase)
-		source ${__dir}/rebasestory.sh
+		source ${__srcdir}/rebasestory.sh
 		rebasestory "$@"
 		;;
 	d | delete)
-		source ${__dir}/deletestory.sh
+		source ${__srcdir}/deletestory.sh
 		deletestory "$@"
 		;;
 	o | open)
-		source ${__dir}/openstory.sh
+		source ${__srcdir}/openstory.sh
 		openstory "$@"
 		;;
 	*)
