@@ -1,3 +1,6 @@
+# shellcheck source=./message.bash
+source "$__root/src/utils/message.bash"
+
 function get_remote_from_branch() {
 	if [[ -z "${1:-}" ]]; then
 		echo "error: branch to get remote from must be provided" >&2
@@ -12,4 +15,19 @@ function get_remote_from_branch() {
 
 	remote=${BASH_REMATCH[1]}
 	echo "$remote"
+}
+
+function get_tracking_remote_from_branch() {
+	if [[ -z "${1:-}" ]]; then
+		echo "error: branch to get remote from must be provided" >&2
+		return 1
+	fi
+	branch="${1}"
+
+	if ! trackingRemote="$(git config branch."$branch".remote)" || [[ -z "$trackingRemote" ]];  then
+		_error "'$branch' is not tracking any remote"
+		return 1
+	fi
+
+	echo "$trackingRemote"
 }
