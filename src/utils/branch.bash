@@ -42,26 +42,30 @@ function get_branches_with_pattern() {
 }
 
 function add_recent_branch() {
-	if branch="${1:-}" && [ -z "$branch" ]; then
+	if ! local branchToAdd="${1:-}" || [ -z "$branchToAdd" ]; then
 		_error "please specify branch to add to recent list"
 		return 1
 	fi
 
-	if ! read -r -a branches <<< "$(git config story.recent)"; then
-		branches=""
+	local branches=()
+	if git config story.recent &>/dev/null; then
+		read -r -a branches <<< "$(git config story.recent)" \
+			|| (_error "unable to get recent branch list from git config" && return 1)
+	else
+		branches=()
 	fi
 
-	[ ! -z "$branches" ] && if ! drop_recent_branch "$branch" 1>/dev/null; then
-		_error "could not remove duplicates in recent branch list for branch '$branch'"
+	[ "${#branches[@]}" -gt 0 ] && if ! drop_recent_branch "$branchToAdd" 1>/dev/null; then
+		_error "could not remove duplicates in recent branch list for branch '$branchToAdd'"
 		return 1
 	fi
 
-	[ ! -z "$branches" ] \
-		&& branches=("$branch" "${branches[*]}") \
-		|| branches=("$branch")
+	[ "${#branches[@]}" -gt 0 ] \
+		&& branches=("$branchToAdd" "${branches[*]}") \
+		|| branches=("$branchToAdd")
 
 	if ! git config story.recent "${branches[*]}"; then
-		_error "could not add '$branch' to recent branch list"
+		_error "could not add '$branchToAdd' to recent branch list"
 		return 1
 	fi
 }

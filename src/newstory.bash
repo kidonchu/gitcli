@@ -65,31 +65,35 @@ function newstory() {
 	_process "no stash: $noStash"
 
 	# save stash for current branch
-	_process "saving stash for current branch"
+	[ $noStash = false ] && _process "saving stash for current branch"
 	[ $noStash = false ] && if ! save_stash; then
 		_error "could not save stash for current branch"
 		return 1
 	fi
 
 	# get remote name from source branch
+	_process "getting remote from branch '$srcBranch'"
 	if ! remote="$(get_remote_from_branch "$srcBranch" 2>&1)"; then
 		_error "could not get remote from source branch '$srcBranch' ($remote)"
 		return 1
 	fi
 
 	# fetch most recent remote source
+	_process "fetching remote '$remote'"
 	if ! git fetch "$remote"; then
 		_error "could not fetch from remote '$remote'"
 		return 1
 	fi
 
 	# create new branch
+	_process "creating new branch '$newBranch' from source '$srcBranch'"
 	if ! git branch --no-track "$newBranch" "refs/remotes/$srcBranch"; then
 		_error "could not create new branch"
 		return 1
 	fi
 
 	# checkout new branch
+	_process "checking out new branch"
 	if ! git checkout "$newBranch"; then
 		git branch -d "$newBranch" || _error "could not delete created branch"
 		_error "could not checkout new branch"
@@ -97,6 +101,7 @@ function newstory() {
 	fi
 
 	# push new branch to remote
+	_process "pushing new branch to remote '$remoteTarget'"
 	if ! git push -u "$remoteTarget" "$newBranch"; then
 		git branch -d "$newBranch" || _error "could not delete created branch"
 		_error "could not push '$newBranch' to the remote '$remoteTarget'"

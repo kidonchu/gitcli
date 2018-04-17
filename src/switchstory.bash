@@ -117,22 +117,32 @@ function switch_branch() {
 	 local targetBranch=${1}
 
 	# save stash for current branch
+	_process "switch_branch: saving stash"
 	if ! save_stash; then
 		_error "could not save stash for current branch"
 		return 1
 	fi
 
-	if ! add_recent_branch "$(get_current_branch)"; then
+	_process "switch_branch: getting current branch"
+	if ! currentBranch="$(get_current_branch 2>&1)"; then
+		_error "could not get current branch ($currentBranch)"
+		return 1
+	fi
+
+	_process "switch_branch: adding branch '$currentBranch' to recent branch list"
+	if ! add_recent_branch "$currentBranch"; then
 		_error "could not add current branch to recent branch list before switching to another branch"
 		return 1
 	fi
 
 	# checkout branch
+	_process "switch_branch: checking out target branch '$targetBranch'"
 	if ! git checkout "$targetBranch"; then
 		_error "could not checkout the branch '$targetBranch'"
 		return 1
 	fi
 
+	_process "switch_branch: dropping target branch '$targetBranch' from recent branch list"
 	if ! drop_recent_branch "$targetBranch" 1>/dev/null; then
 		_error "could not drop branch '$targetBranch' from recent branch list after switching to the branch"
 		return 1

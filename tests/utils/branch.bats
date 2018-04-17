@@ -57,7 +57,15 @@ function teardown() {
 	[[ "$output" =~ "please specify branch to add to recent list" ]]
 }
 
+@test "it should add branch to unset recent branch list" {
+	run add_recent_branch feature/test-branch
+	[ "$status" -eq 0 ]
+	run git config story.recent
+	[ "$output" = "feature/test-branch" ]
+}
+
 @test "it should add branch to empty recent branch list" {
+	run git config story.recent ""
 	run add_recent_branch feature/test-branch
 	[ "$status" -eq 0 ]
 	run git config story.recent
