@@ -65,6 +65,7 @@ function newstory() {
 	_process "no stash: $noStash"
 
 	# save stash for current branch
+	_process "saving stash for current branch"
 	[ $noStash = false ] && if ! save_stash; then
 		_error "could not save stash for current branch"
 		return 1
@@ -90,12 +91,14 @@ function newstory() {
 
 	# checkout new branch
 	if ! git checkout "$newBranch"; then
+		git branch -d "$newBranch" || _error "could not delete created branch"
 		_error "could not checkout new branch"
 		return 1
 	fi
 
 	# push new branch to remote
 	if ! git push -u "$remoteTarget" "$newBranch"; then
+		git branch -d "$newBranch" || _error "could not delete created branch"
 		_error "could not push '$newBranch' to the remote '$remoteTarget'"
 		return 1
 	fi

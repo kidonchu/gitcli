@@ -72,8 +72,8 @@ function get_pr_url() {
 		return 1
 	fi
 
-	url=`printf "https://github.com/%s/%s/compare/%s...%s:%s?expand=1" \
-		"${baseOwner}" "${baseRepo}" "${baseBranch}" "${headOwner}" "${headBranch}"`
+	url=$(printf "https://github.com/%s/%s/compare/%s...%s:%s?expand=1" \
+		"${baseOwner}" "${baseRepo}" "${baseBranch}" "${headOwner}" "${headBranch}")
 
 	echo "$url"
 }
