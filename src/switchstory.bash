@@ -48,8 +48,9 @@ function switch_with_pattern() {
 
 	_process "pattern: $pattern"
 
-	if ! branches=($(get_branches_with_pattern "$pattern" 2>&1)); then
-		_error "unable to get branches matching pattern '$pattern' ($branches)" 
+	local branches=()
+	if ! read -r -a branches <<< "$(get_branches_with_pattern "$pattern")"; then
+		_error "unable to get branches matching pattern '$pattern'"
 		return 1
 	fi
 	
