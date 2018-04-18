@@ -35,6 +35,10 @@ function prstory() {
 		exit 1
 	fi
 
+	if ! copy_issue_to_clipboard; then
+		_notice "unable to copy issue to clipboard"
+	fi
+
 	open "$url"
 }
 
@@ -76,6 +80,26 @@ function get_pr_url() {
 		"${baseOwner}" "${baseRepo}" "${baseBranch}" "${headOwner}" "${headBranch}")
 
 	echo "$url"
+}
+
+function copy_issue_to_clipboard() {
+
+	local branch
+	if ! branch="$(get_current_branch)"; then
+		_error "could not get current branch"
+		return 1
+	fi
+
+	local pattern='^[[:alnum:]]+/([[:alpha:]]+-[[:digit:]]+)(-.*)?'
+
+	if [[ "$branch" =~ $pattern ]]; then
+		issue="${BASH_REMATCH[1]}"
+		issue="$(echo "$issue" | awk '{print toupper($0)}')"
+		if ! printf "[%s]" "$issue" | pbcopy &> /dev/null; then
+			_error "could not copy '$issue' to clipboard"
+			return 1
+		fi
+	fi
 }
 
 function print_usage() {

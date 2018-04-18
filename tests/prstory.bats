@@ -103,3 +103,11 @@ function teardown() {
 	[ "$status" -eq 0 ]
 	[ "$output" = "https://github.com/kidonchu/non-existent/compare/feature/test-branch...kidonchu:feature/hello-world?expand=1" ]
 }
+
+@test "it should copy issue to clipboard" {
+	run git checkout -b feature/issue-123-fix-clipboard
+	run copy_issue_to_clipboard
+	[ "$status" -eq 0 ]
+	issue=$(pbpaste)
+	[ "$issue" = "[ISSUE-123]" ]
+}
