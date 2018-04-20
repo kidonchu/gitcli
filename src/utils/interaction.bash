@@ -9,7 +9,7 @@ function choose_one() {
 	fi
 
 	# we don't want to hang bats test with `select`
-	if [[ "$GITCLI_ENV" == "test" ]]; then
+	if [[ "${GITCLI_ENV:-}" == "test" ]]; then
 		echo "${choices[0]}"
 		return 0
 	fi
@@ -34,7 +34,7 @@ function choose_multiple() {
 	fi
 
 	# we don't want to hang bats test with `select`
-	if [[ "$GITCLI_ENV" == "test" ]]; then
+	if [[ "${GITCLI_ENV:-}" == "test" ]]; then
 		echo "${choices[0]} ${choices[2]}"
 		return 0
 	fi
