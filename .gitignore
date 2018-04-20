@@ -1,1 +1,3 @@
 ctags
+tests/bats-test-tmp/
+tests/bats-test-tmp-bare/
