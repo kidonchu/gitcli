@@ -22,7 +22,6 @@ __root="$__dir"
 __srcdir="${__dir}/src"
 
 # source common functions
-source ${__srcdir}/messages.sh
 source ${__srcdir}/utils.sh
 
 # command stored in $1, subcommand stored in $2
@@ -60,13 +59,9 @@ case "${subcmd}" in
 		source ${__srcdir}/pullstory.sh
 		pullstory "$@"
 		;;
-	r | rebase)
-		source ${__srcdir}/rebasestory.sh
-		rebasestory "$@"
-		;;
 	d | delete)
-		source ${__srcdir}/deletestory.sh
-		deletestory "$@"
+		source ${__srcdir}/deletestory.bash
+		deletestory "$@" || exit 1
 		;;
 	*)
 		_gitcli_error "Unsupported subcommand: ${subcmd}"
