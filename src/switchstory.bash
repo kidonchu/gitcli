@@ -148,6 +148,13 @@ function switch_branch() {
 		_error "could not drop branch '$targetBranch' from recent branch list after switching to the branch"
 		return 1
 	fi
+
+	# save stash for current branch
+	_process "switch_branch: popping out saved stash"
+	if ! pop_stash; then
+		_error "could not pop saved stash for current branch"
+		return 1
+	fi
 }
 
 function print_usage() {

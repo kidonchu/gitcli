@@ -127,3 +127,25 @@ function teardown() {
 	run git config story.recent
 	[[ ! "$output" =~ "feature/hello-world" ]]
 }
+
+@test "it should pop saved stash when switching to branch" {
+	touch c.txt
+	run git add -A
+	run git status
+	[[ "$output" =~ "Changes to be committed" ]]
+
+	run git stash
+	run git status
+	[[ "$output" =~ "working tree clean" ]]
+
+	run git rev-parse stash@\{0\}
+	stashhash="$output"
+	run git config branch.feature/test-branch.laststash "$stashhash"
+
+	run git checkout -b "feature/issue-1"
+	run switchstory -p "feature/test-branch"
+	[ "$status" -eq 0 ]
+
+	run git status
+	[[ "$output" =~ "Untracked files" ]]
+}
