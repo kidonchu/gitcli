@@ -21,9 +21,6 @@ __base="$(basename ${__file} .zsh)"
 __root="$__dir"
 __srcdir="${__dir}/src"
 
-# source common functions
-source ${__srcdir}/utils.sh
-
 # command stored in $1, subcommand stored in $2
 cmd="${1:-}"
 subcmd="${2:-}"
