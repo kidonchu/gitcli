@@ -52,26 +52,26 @@ function save_stash() {
 function pop_stash() {
 
 	if ! branch="$(get_current_branch 2>&1)"; then
-		echo "error: could not get current branch ($branch)" >&2
+		_error "error: could not get current branch ($branch)" >&2
 		return 1
 	fi
 
-	_process "getting last stash's hash from config"
+	_process "pop_stash: getting last stash's hash from config"
 	if ! hash="$(git config "branch.$branch.laststash")" || [ -z "$hash" ]; then
 		# no stash associated with current branch, just return ok
 		_process "no last stash found. skipping"
 		return 0
 	fi
 
-	_process "getting a list of stashes"
+	_process "pop_stash: getting a list of stashes"
 	if ! stashes="$(git reflog show stash --pretty=format:'%gD %H' 2>&1)"; then
-		echo "error: unable to get a list of stashes ($stashes)" >&2
+		_error "error: unable to get a list of stashes ($stashes)" >&2
 		return 1
 	fi
 
-	_process "checking if branch's last stash hash matches any stash in the list of stashes"
+	_process "pop_stash: checking if branch's last stash hash matches any stash in the list of stashes"
 	if ! stash=$(echo "${stashes[@]}" | grep "$hash") || [ -z "$stash" ]; then
-		echo "error: unable to find a stash with '$hash'" >&2
+		_error "error: unable to find a stash with '$hash'" >&2
 		return 1
 	fi
 	
@@ -80,7 +80,7 @@ function pop_stash() {
 		git stash pop "stash@{$index}"
 		git reset
 	else
-		echo "error: stash didn't match the pattern: stash@{#} XXX" >&2
+		_error "pop_stash: stash didn't match the pattern: stash@{#} XXX" >&2
 		return 1
 	fi
 }
