@@ -8,6 +8,8 @@ source "$__root/src/utils/stash.bash"
 source "$__root/src/utils/message.bash"
 # shellcheck source=./utils/branch.bash
 source "$__root/src/utils/branch.bash"
+# shellcheck source=./utils/interaction.bash
+source "$__root/src/utils/interaction.bash"
 
 function switchstory() {
 	
@@ -46,9 +48,8 @@ function switch_with_pattern() {
 	fi
 	pattern="${1}"
 
-	_process "pattern: $pattern"
-
 	local branches=()
+	_process "searching for branches with pattern '$pattern'"
 	if ! read -r -a branches <<< "$(get_branches_with_pattern "$pattern")"; then
 		_error "unable to get branches matching pattern '$pattern'"
 		return 1
@@ -72,7 +73,7 @@ function switch_with_pattern() {
 
 function switch_with_recent() {
 
-	if ! read -r -a branches <<< $(get_recent_branch_list); then
+	if ! read -r -a branches <<< "$(get_recent_branch_list)"; then
 		_error "no branch found in recent branch list"
 		return 1
 	fi
@@ -90,24 +91,6 @@ function switch_with_recent() {
 	choice=$(choose_one "${branches[@]}")
 
 	switch_branch "$choice" || return 1
-}
-function choose_one() {
-	choices=("$@")
-	if [[ "${#choices[@]}" -eq 0 ]]; then
-		_error "nothing to choose one from"
-		return 1
-	fi
-
-	PS3=">>> Choose one: "
-	select choice in "${choices[@]}"
-	do
-		case "$choice" in
-			*)
-				echo "$choice"
-				break
-				;;
-		esac
-	done
 }
 
 function switch_branch() {

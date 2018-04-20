@@ -39,3 +39,11 @@ function _teardown_git() {
 function _cd_git() {
 	cd "$__tmp_dir" || return
 }
+
+function _setup_global() {
+	export GITCLI_ENV=test
+}
+
+function _teardown_global() {
+	unset GITCLI_ENV
+}

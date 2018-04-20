@@ -59,6 +59,7 @@ function pop_stash() {
 	_process "getting last stash's hash from config"
 	if ! hash="$(git config "branch.$branch.laststash")" || [ -z "$hash" ]; then
 		# no stash associated with current branch, just return ok
+		_process "no last stash found. skipping"
 		return 0
 	fi
 

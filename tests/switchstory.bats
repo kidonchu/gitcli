@@ -4,6 +4,7 @@ load test_helper
 load ../src/switchstory
 
 function setup() {
+	_setup_global
 	_setup_git
 	_cd_git
 }
@@ -11,6 +12,7 @@ function setup() {
 function teardown() {
 	cd ..
 	_teardown_git
+	_teardown_global
 }
 
 @test "incorrect option" {
@@ -44,17 +46,11 @@ function teardown() {
 	run git branch "feature/hello-another-world"
 	run git branch "feature/hello-world"
 
-	# mock function to test list of branches matching patterns
-	function choose_one() {
-		choices=($@)
-		echo "${choices[1]}" # return second branch: feature/hello-world
-	}
-
 	run switchstory -p "hello-"
 	[ "$status" -eq 0 ]
 
 	run git rev-parse --abbrev-ref HEAD
-	[ "$output" = "feature/hello-world" ]
+	[ "$output" = "feature/hello-another-world" ]
 }
 
 @test "it should not error out when there is no branch in recent branch list" {
@@ -77,13 +73,7 @@ function teardown() {
 	run git branch "feature/hello-another-world"
 	run git branch "feature/hello-world"
 	run git branch "feature/test-branch"
-	run git config story.recent "feature/test-branch feature/hello-world feature/hello-another-world"
-
-	# mock function to test list of branches matching patterns
-	function choose_one() {
-		choices=($@)
-		echo "${choices[1]}" # return second branch: feature/hello-world
-	}
+	run git config story.recent "feature/hello-world feature/test-branch feature/hello-another-world"
 
 	run switchstory -r
 	[ "$status" -eq 0 ]
