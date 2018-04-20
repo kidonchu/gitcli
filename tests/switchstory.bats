@@ -118,6 +118,14 @@ function teardown() {
 	[[ ! "$output" =~ "feature/hello-world" ]]
 }
 
+@test "it should not error out when popping stash fails after switching to branch" {
+	run git config branch.feature/test-branch.laststash "NONONONONO"
+	run git checkout -b "feature/issue-1"
+	run switchstory -p "feature/test-branch"
+	[ "$status" -eq 0 ]
+	[[ "$output" =~ "could not pop saved stash for current branch" ]]
+}
+
 @test "it should pop saved stash when switching to branch" {
 	touch c.txt
 	run git add -A

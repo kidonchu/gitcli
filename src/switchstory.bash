@@ -135,8 +135,8 @@ function switch_branch() {
 	# save stash for current branch
 	_process "switch_branch: popping out saved stash"
 	if ! pop_stash; then
-		_error "could not pop saved stash for current branch"
-		return 1
+		_notice "could not pop saved stash for current branch"
+		return 0
 	fi
 }
 
