@@ -72,17 +72,19 @@ function pop_stash() {
 	_process "pop_stash: checking if branch's last stash hash matches any stash in the list of stashes"
 	if ! stash=$(echo "${stashes[@]}" | grep "$hash") || [ -z "$stash" ]; then
 		_notice "unable to find a stash with '$hash'"
-		return 0
 	fi
 	
-	if [[ "$stash" =~ stash@\{([[:digit:]]+)\}[[:space:]]+[[:alnum:]]+ ]]; then
-		index="${BASH_REMATCH[1]}"
-		git stash pop "stash@{$index}"
-		git reset
-	else
-		_error "pop_stash: stash didn't match the pattern: stash@{#} XXX"
-		return 1
-	fi
+	[ ! -z "$stash" ] && {
+
+		if [[ "$stash" =~ stash@\{([[:digit:]]+)\}[[:space:]]+[[:alnum:]]+ ]]; then
+			index="${BASH_REMATCH[1]}"
+			git stash pop "stash@{$index}"
+			git reset
+		else
+			_error "pop_stash: stash didn't match the pattern: stash@{#} XXX"
+			return 1
+		fi
+	}
 
 	_process "pop_stash: clearing out laststash hash"
 	if ! git config "branch.$branch.laststash" ""; then
