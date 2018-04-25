@@ -65,14 +65,14 @@ function pop_stash() {
 
 	_process "pop_stash: getting a list of stashes"
 	if ! stashes="$(git reflog show stash --pretty=format:'%gD %H' 2>&1)"; then
-		_error "error: unable to get a list of stashes ($stashes)" >&2
+		_error "unable to get a list of stashes ($stashes)"
 		return 1
 	fi
 
 	_process "pop_stash: checking if branch's last stash hash matches any stash in the list of stashes"
 	if ! stash=$(echo "${stashes[@]}" | grep "$hash") || [ -z "$stash" ]; then
-		_error "error: unable to find a stash with '$hash'" >&2
-		return 1
+		_notice "unable to find a stash with '$hash'"
+		return 0
 	fi
 	
 	if [[ "$stash" =~ stash@\{([[:digit:]]+)\}[[:space:]]+[[:alnum:]]+ ]]; then
@@ -80,7 +80,12 @@ function pop_stash() {
 		git stash pop "stash@{$index}"
 		git reset
 	else
-		_error "pop_stash: stash didn't match the pattern: stash@{#} XXX" >&2
+		_error "pop_stash: stash didn't match the pattern: stash@{#} XXX"
 		return 1
+	fi
+
+	_process "pop_stash: clearing out laststash hash"
+	if ! git config "branch.$branch.laststash" ""; then
+		_notice "pop_stash: could not clear out laststash hash for '$branch'"
 	fi
 }

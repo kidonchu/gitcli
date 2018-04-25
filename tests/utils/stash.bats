@@ -78,7 +78,7 @@ function teardown() {
 	run git config branch.feature/test-branch.laststash "2007a3809d53b20b0e701eeff36c4090175ee644"
 
 	run pop_stash "feature/test-branch"
-	[ "$status" -eq 1 ]
+	[ "$status" -eq 0 ]
 	[[ "$output" =~ "unable to find a stash" ]]
 }
 
@@ -97,4 +97,24 @@ function teardown() {
 	run git status -s
 	[ "$status" -eq 0 ]
 	[[ "$output" =~ ^[[:space:]]*M.*a\.txt ]]
+}
+
+@test "it should clear out laststash hash once the stash is popped out" {
+	echo "text change 1" >> a.txt
+	run git stash
+	run git reflog show stash --pretty=format:%H -n 1
+	stashHash="$output"
+
+	run git config branch.feature/test-branch.laststash "$stashHash"
+
+	# test laststash set to corrent hash
+	run pop_stash "feature/test-branch"
+	[ "$status" -eq 0 ]
+
+	run git status -s
+	[ "$status" -eq 0 ]
+	[[ "$output" =~ ^[[:space:]]*M.*a\.txt ]]
+
+	run git config branch.feature/test-branch.laststash
+	[[ -z "$output" ]]
 }
