@@ -25,7 +25,7 @@ function get_tracking_remote_from_branch() {
 	branch="${1}"
 
 	if ! trackingRemote="$(git config branch."$branch".remote)" || [[ -z "$trackingRemote" ]];  then
-		_error "'$branch' is not tracking any remote"
+		_notice "'$branch' is not tracking any remote"
 		return 1
 	fi
 

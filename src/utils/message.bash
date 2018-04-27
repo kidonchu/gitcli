@@ -1,22 +1,33 @@
-ERROR="$(tput setaf 1)ERROR: $(tput sgr0)"
-PROCESS="$(tput setaf 5)PROCESSING: $(tput sgr0)"
-SUCCESS="$(tput setaf 2)SUCCESS: $(tput sgr0)"
-NOTICE="$(tput setaf 4)NOTICE: $(tput sgr0)"
-
 function _error() {
-	echo >&2 "${ERROR}${1}"
+	prefix="ERROR:"
+	if command -v tput >/dev/null; then
+		prefix="$(tput setaf 1)ERROR:$(tput sgr0)"
+	fi
+	>&2 echo "$prefix $*"
 }
 
 function _process() {
-	echo "${PROCESS}${1}"
+	prefix="PROCESSING:"
+	if command -v tput >/dev/null; then
+		prefix="$(tput setaf 5)PROCESSING:$(tput sgr0)"
+	fi
+	>&2 echo "$prefix $*"
 }
 
-function _gitcli_success() {
-	echo "$(tput setaf 2)|---------------------------|"
-	echo "| Job Done. Go Break a LEG! |"
-	echo "|---------------------------|$(tput sgr0)"
+function _success() {
+	local prefix
+	local suffix
+	if command -v tput >/dev/null; then
+		prefix="$(tput setaf 2)"
+		suffix="$(tput sgr0)"
+	fi
+	echo "${prefix}Job Done. Go Break a LEG! $suffix"
 }
 
 function _notice() {
-	echo "${NOTICE}${1}"
+	prefix="NOTICE:"
+	if command -v tput >/dev/null; then
+		prefix="$(tput setaf 4)NOTICE:$(tput sgr0)"
+	fi
+	>&2 echo "$prefix $*"
 }

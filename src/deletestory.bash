@@ -6,6 +6,8 @@ source "$__root/src/utils/stash.bash"
 source "$__root/src/utils/message.bash"
 # shellcheck source=./utils/branch.bash
 source "$__root/src/utils/branch.bash"
+# shellcheck source=./utils/interaction.bash
+source "$__root/src/utils/interaction.bash"
 
 function deletestory() {
 	
