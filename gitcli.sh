@@ -60,6 +60,10 @@ case "${subcmd}" in
 		source ${__srcdir}/deletestory.bash
 		deletestory "$@" || exit 1
 		;;
+	ss | savestash)
+		source ${__srcdir}/savestash.bash
+		savestash "$@" || exit 1
+		;;
 	*)
 		_gitcli_error "Unsupported subcommand: ${subcmd}"
 		exit 1
