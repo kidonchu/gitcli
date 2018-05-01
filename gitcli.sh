@@ -52,10 +52,6 @@ case "${subcmd}" in
 		source ${__srcdir}/prstory.bash
 		prstory "$@" || exit 1
 		;;
-	p | pull)
-		source ${__srcdir}/pullstory.sh
-		pullstory "$@"
-		;;
 	d | delete)
 		source ${__srcdir}/deletestory.bash
 		deletestory "$@" || exit 1
@@ -63,6 +59,10 @@ case "${subcmd}" in
 	ss | savestash)
 		source ${__srcdir}/savestash.bash
 		savestash "$@" || exit 1
+		;;
+	ps | push)
+		source ${__srcdir}/pushstory.bash
+		pushstory "$@" || exit 1
 		;;
 	*)
 		_gitcli_error "Unsupported subcommand: ${subcmd}"
