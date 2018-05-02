@@ -53,3 +53,72 @@ function teardown() {
 	run git rev-parse --verify feature/issue-1
 	[ "$status" -ne 0 ]
 }
+
+@test "it should error out if defaultBranch to switch to is not set when deleting current branch" {
+	run git checkout -b feature/issue-1
+	run delete_current
+	[ "$status" -eq 1 ]
+	[[ "$output" =~ "could not get default branch" ]]
+}
+
+@test "it should delete current local branch" {
+	run git config story.defaultBranch feature/issue-1
+	run git checkout -b feature/issue-1
+	run git checkout -b feature/issue-2
+	run delete_current
+	[ "$status" -eq 0 ]
+
+	run git rev-parse --verify feature/issue-2
+	[ "$status" -ne 0 ]
+}
+
+@test "it should delete current local branch AND remote branch if remote is origin" {
+	run git config story.defaultBranch feature/issue-1
+	run git checkout -b feature/issue-1
+	run git checkout -b feature/issue-2
+	run git push -u origin feature/issue-2
+
+	run git config "branch.feature/issue-2.remote"
+	[ "$status" -eq 0 ]
+
+	run delete_current
+	[ "$status" -eq 0 ]
+
+	run git config "branch.feature/issue-2.remote"
+	[ "$status" -ne 0 ]
+
+	run git rev-parse --verify feature/issue-2
+	[ "$status" -ne 0 ]
+}
+
+@test "it should checkout default branch when deleting current branch" {
+	run git config story.defaultBranch feature/issue-1
+	run git checkout -b feature/issue-1
+	run git checkout -b feature/issue-2
+
+	run delete_current
+	[ "$status" -eq 0 ]
+
+	run git rev-parse --verify feature/issue-1
+	[ "$status" -eq 0 ]
+}
+
+@test "it should delete current local branch but not delete remote branch if remote is not origin" {
+	run git config story.defaultBranch feature/issue-1
+	run git checkout -b feature/issue-1
+	run git checkout -b feature/issue-2
+	run git push -u remote1 feature/issue-2
+
+	run sh -c 'git br -r | grep feature/issue-2'
+	[ "$status" -eq 0 ]
+
+	run delete_current
+	[ "$status" -eq 0 ]
+
+	run sh -c 'git br -r | grep feature/issue-2'
+	[ "$status" -eq 0 ]
+
+	run git rev-parse --verify feature/issue-2
+	[ "$status" -ne 0 ]
+}
+

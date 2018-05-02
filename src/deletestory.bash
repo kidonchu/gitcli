@@ -8,12 +8,15 @@ source "$__root/src/utils/message.bash"
 source "$__root/src/utils/branch.bash"
 # shellcheck source=./utils/interaction.bash
 source "$__root/src/utils/interaction.bash"
+# shellcheck source=./switchstory.bash
+source "$__root/src/switchstory.bash"
 
 function deletestory() {
 	
 	# idea: show branches older than X days
 	
 	local pattern=''
+	local deleteCurrent=false
 
 	while [ $# -gt 0 ]
 	do
@@ -21,6 +24,9 @@ function deletestory() {
 			-p | --pattern)
 				pattern="$2"
 				shift
+				;;
+			-c | --current)
+				deleteCurrent=true
 				;;
 			*) # unknown flag
 				print_usage >&2
@@ -30,7 +36,32 @@ function deletestory() {
 		shift
 	done
 
-	delete_with_pattern "$pattern"
+	if [[ $deleteCurrent == true ]]; then
+		delete_current
+	else
+		delete_with_pattern "$pattern"
+	fi
+}
+
+function delete_current() {
+	_process "getting current branch"
+	if ! currentBranch="$(get_current_branch 2>&1)"; then
+		_error "could not get current branch ($currentBranch)"
+		return 1
+	fi
+
+	if ! defaultBranch="$(git config story.defaultBranch)"; then
+		_error "could not get default branch from 'git config story.defaultBranch'"
+		return 1
+	fi
+
+	# switch to default branch
+	if ! switch_branch "$defaultBranch"; then
+		_error "unable to switch to develop"
+		return 1
+	fi
+
+	delete_branch "$currentBranch"
 }
 
 function delete_with_pattern() {
