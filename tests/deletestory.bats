@@ -54,6 +54,25 @@ function teardown() {
 	[ "$status" -ne 0 ]
 }
 
+@test "it should drop saved stash after deleting a branch" {
+	# Given a saved stash
+	echo "text change 1" >> a.txt
+	run git stash
+	run git reflog show stash --pretty=format:%H -n 1
+	stashHash="$output"
+	run git config branch.feature/test-branch.laststash "$stashHash"
+
+	# And a new branch checked out
+	run git checkout -b feature/issue-1
+
+	# When I delete a branch
+	run delete_branch "feature/test-branch"
+	[ "$status" -eq 0 ]
+
+	run git rev-parse --verify feature/issue-1
+	[ "$status" -eq 0 ]
+}
+
 @test "it should error out if defaultBranch to switch to is not set when deleting current branch" {
 	run git checkout -b feature/issue-1
 	run delete_current
@@ -121,4 +140,3 @@ function teardown() {
 	run git rev-parse --verify feature/issue-2
 	[ "$status" -ne 0 ]
 }
-

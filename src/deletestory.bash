@@ -106,6 +106,12 @@ function delete_branch() {
 		git push origin --delete "$branch"
 	fi
 
+	# see if there is any stash saved for the branch
+	_process "delete_branch: getting last stash's hash for '$branch"
+	if ! hash="$(git config "branch.$branch.laststash")" || [ -z "$hash" ]; then
+		_process "no last stash found"
+	fi
+
 	_process "deleting local branch '$branch'"
 	if ! output="$(git branch -d "$branch" 2>&1)"; then
 		if [[ "$output" =~ 'is not fully merged' ]]; then
@@ -124,6 +130,11 @@ function delete_branch() {
 					;;
 			esac
 		fi
+	fi
+
+	# if stash found, drop the stash first
+	if ! ([[ ! -z "$hash" ]] && git drop stash "$hash") ; then
+		_notice "unable to drop saved stash '$hash'"
 	fi
 }
 
