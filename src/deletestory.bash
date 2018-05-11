@@ -132,8 +132,12 @@ function delete_branch() {
 		fi
 	fi
 
+	if [[ -z "$(echo "$hash" | tr -d '[:space:]')" ]]; then
+		return 0
+	fi
+
 	# if stash found, drop the stash first
-	if ! ([[ ! -z "$hash" ]] && git drop stash "$hash") ; then
+	if ! git drop stash "$hash" ; then
 		_notice "unable to drop saved stash '$hash'"
 	fi
 }
