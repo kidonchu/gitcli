@@ -61,10 +61,22 @@ function add_recent_branch() {
 	fi
 
 	[ "${#branches[@]}" -gt 0 ] \
-		&& branches=("$branchToAdd" "${branches[*]}") \
+		&& branches=("$branchToAdd" "${branches[@]}") \
 		|| branches=("$branchToAdd")
 
-	if ! git config story.recent "${branches[*]}"; then
+	# see if recentLimit is set. If not, use 10 as default
+	recentLimit="$(git config story.recentLimit)" || recentLimit=10
+
+	mostRecentBranches=()
+	for i in "${!branches[@]}"
+	do
+		if [[ $i -ge $recentLimit ]]; then
+			break
+		fi
+		mostRecentBranches[i]="${branches[i]}"
+	done
+
+	if ! git config story.recent "${mostRecentBranches[*]}"; then
 		_error "could not add '$branchToAdd' to recent branch list"
 		return 1
 	fi

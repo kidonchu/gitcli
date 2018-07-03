@@ -88,6 +88,24 @@ function teardown() {
 	[ "$output" = "feature/test-branch feature/hello-world feature/hi-world" ]
 }
 
+@test "it should persist only story.recentLimit number of most recent branches after adding branch to the recent branch list" {
+	git config story.recentLimit 2
+	run git config story.recent "feature/second-branch feature/third-branch"
+	run add_recent_branch feature/first-branch
+	[ "$status" -eq 0 ]
+	run git config story.recent
+	[ "$output" = "feature/first-branch feature/second-branch" ]
+}
+
+@test "it should persist only 10 most recent branches if story.recentLimit is not defined after adding branch to the recent branch list" {
+	run git config story.recent \
+		"feature/second-branch feature/third-branch feature/fourth-branch feature/fifth-branch feature/sixth-branch feature/seventh-branch feature/eighth-branch feature/nineth-branch feature/tenth-branch feature/eleventh-branch"
+	run add_recent_branch feature/first-branch
+	[ "$status" -eq 0 ]
+	run git config story.recent
+	[ "$output" = "feature/first-branch feature/second-branch feature/third-branch feature/fourth-branch feature/fifth-branch feature/sixth-branch feature/seventh-branch feature/eighth-branch feature/nineth-branch feature/tenth-branch" ]
+}
+
 @test "it should error out when branch to pop is not specified" {
 	run drop_recent_branch
 	[ "$status" -eq 1 ]
