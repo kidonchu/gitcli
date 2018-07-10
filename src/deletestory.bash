@@ -56,7 +56,7 @@ function delete_current() {
 	fi
 
 	# switch to default branch
-	if ! switch_branch "$defaultBranch"; then
+	if ! switch_branch "$defaultBranch" --no-stash; then
 		_error "unable to switch to develop"
 		return 1
 	fi
@@ -94,6 +94,7 @@ function delete_with_pattern() {
 }
 
 function delete_branch() {
+	# @TODO delete branch from recent list as well
 	local branch
 	if ! branch=${1:-} || [[ -z "$branch" ]]; then
 		_error "no branch specified to delete"
@@ -132,13 +133,16 @@ function delete_branch() {
 		fi
 	fi
 
-	if [[ -z "$(echo "$hash" | tr -d '[:space:]')" ]]; then
-		return 0
+	if [[ ! -z "$(echo "$hash" | tr -d '[:space:]')" ]]; then
+		_process "dropping saved stash for deleted branch"
+		if ! git drop stash "$hash" ; then
+			_notice "unable to drop saved stash '$hash'"
+		fi
 	fi
 
-	# if stash found, drop the stash first
-	if ! git drop stash "$hash" ; then
-		_notice "unable to drop saved stash '$hash'"
+	_process "dropping deleted branch from recent branch list"
+	if ! drop_recent_branch "$branch"; then
+		_notice "could not drop deleted branch from recent branch list"
 	fi
 }
 

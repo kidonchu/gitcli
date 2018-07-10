@@ -73,6 +73,17 @@ function teardown() {
 	[ "$status" -eq 0 ]
 }
 
+@test "it should drop deleted branch from recent branch list" {
+	run git checkout -b feature/temp-branch
+	run git config story.recent feature/test-branch
+
+	run delete_branch "feature/test-branch"
+	[ "$status" -eq 0 ]
+
+	run git config story.recent
+	[ "$output" = "" ]
+}
+
 @test "it should error out if defaultBranch to switch to is not set when deleting current branch" {
 	run git checkout -b feature/issue-1
 	run delete_current
