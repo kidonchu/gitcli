@@ -81,6 +81,15 @@ function teardown() {
 	[[ "$output" =~ [[:alnum:]]{40} ]]
 }
 
+@test "it should add current branch to recent branch list before creating new branch" {
+	run git checkout -b feature/current-branch
+	run newstory -b feature/newstory-branch -s upstream/feature/test-branch
+	[ "$status" -eq 0 ]
+
+	run git config story.recent
+	[ "$output" = "feature/current-branch" ]
+}
+
 @test "it should not stash current branch's changes if --no-stash flag is given" {
 	run touch add c.txt
 

@@ -92,6 +92,13 @@ function newstory() {
 		return 1
 	fi
 
+	# add current branch to recent branch list before checking out new branch
+	_process "adding current branch to recent branch list"
+	if ! add_current_to_recent_branch; then
+		_error "could not add current branch to recent branch list"
+		return 1
+	fi
+
 	# checkout new branch
 	_process "checking out new branch"
 	if ! git checkout "$newBranch"; then

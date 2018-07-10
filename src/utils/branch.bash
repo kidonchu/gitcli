@@ -82,6 +82,20 @@ function add_recent_branch() {
 	fi
 }
 
+function add_current_to_recent_branch() {
+	_process "getting current branch"
+	if ! currentBranch="$(get_current_branch 2>&1)"; then
+		_error "could not get current branch ($currentBranch)"
+		return 1
+	fi
+
+	_process "adding branch '$currentBranch' to recent branch list"
+	if ! add_recent_branch "$currentBranch"; then
+		_error "could not add current branch to recent branch list"
+		return 1
+	fi
+}
+
 function drop_recent_branch() {
 	if branchToPop="${1:-}" && [ -z "$branchToPop" ]; then
 		_error "branch to pop from recent branch list is not specified"

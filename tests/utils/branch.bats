@@ -17,7 +17,7 @@ function teardown() {
 	run git checkout -b feature/test-branch
 	run touch a.txt && run git add a.txt
 	run git commit -m "Add a.txt"
-	
+
 	run get_current_branch
 	[ "$status" -eq 0 ]
 	[ "$output" = "feature/test-branch" ]
@@ -62,6 +62,14 @@ function teardown() {
 	[ "$status" -eq 0 ]
 	run git config story.recent
 	[ "$output" = "feature/test-branch" ]
+}
+
+@test "it should add current branch to recent branch list" {
+	run git checkout -b feature/current-branch
+	run add_current_to_recent_branch
+	[ "$status" -eq 0 ]
+	run git config story.recent
+	[ "$output" = "feature/current-branch" ]
 }
 
 @test "it should add branch to empty recent branch list" {
@@ -164,3 +172,4 @@ function teardown() {
 	[ "$status" -eq 0 ]
 	[ "$output" = "feature/hello-world feature/test-branch feature/hi feature/test-branch" ]
 }
+
