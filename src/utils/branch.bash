@@ -47,6 +47,11 @@ function add_recent_branch() {
 		return 1
 	fi
 
+	# if detached reference, don't bother adding to the list
+	if [[ "$branchToAdd" == "HEAD" ]]; then
+		return 0
+	fi
+
 	local branches=()
 	if git config story.recent &>/dev/null; then
 		read -r -a branches <<< "$(git config story.recent)" \

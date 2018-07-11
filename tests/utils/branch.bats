@@ -88,6 +88,13 @@ function teardown() {
 	[ "$output" = "feature/test-branch feature/hello-world feature/hi-world" ]
 }
 
+@test "it should not add HEAD branch to recent branch list" {
+	run add_recent_branch HEAD
+	[ "$status" -eq 0 ]
+	run git config story.recent
+	[ "$output" = "" ]
+}
+
 @test "it should remove duplicates before adding branch to the recent branch list" {
 	run git config story.recent "feature/hello-world feature/test-branch feature/hi-world"
 	run add_recent_branch feature/test-branch
