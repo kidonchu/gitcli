@@ -5,6 +5,18 @@ source "$__root/src/utils/message.bash"
 
 function save_stash() {
 
+	_process "getting current branch to store stash hash"
+	if ! branch="$(get_current_branch)"; then
+		_error "could not get current branch ($branch)"
+		return 1
+	fi
+
+	# do not bother stashing for HEAD branch
+	if [[ "$branch" == "HEAD" ]]; then
+		_notice "not stashing because this is HEAD branch"
+		return 0
+	fi
+
 	# check to see if there are things to be stashed
 	if ! hasChanges="$(git status -s)"; then
 		_error "error: unable to determine change status"
@@ -33,12 +45,6 @@ function save_stash() {
 	_process "getting hash for just saved stash"
 	if ! sha="$(git rev-parse stash@\{0\})"; then
 		_error "could not retrieve stash hash"
-		return 1
-	fi
-
-	_process "getting current branch to store stash hash"
-	if ! branch="$(get_current_branch)"; then
-		_error "could not get current branch ($branch)"
 		return 1
 	fi
 

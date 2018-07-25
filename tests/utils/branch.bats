@@ -72,6 +72,17 @@ function teardown() {
 	[ "$output" = "feature/current-branch" ]
 }
 
+@test "it should not add detached current branch to recent branch list" {
+	run git checkout -b feature/tagged-branch
+	run git tag new-tag
+	run git checkout feature/test-branch
+	run git checkout new-tag
+	run add_current_to_recent_branch
+	[ "$status" -eq 0 ]
+	run git config story.recent
+	[ "$output" = "" ]
+}
+
 @test "it should add branch to empty recent branch list" {
 	run git config story.recent ""
 	run add_recent_branch feature/test-branch

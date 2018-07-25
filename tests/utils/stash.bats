@@ -54,6 +54,18 @@ function teardown() {
 	[[ "$output" =~ [[:alnum:]]{40} ]]
 }
 
+@test "not stashing if HEAD branch" {
+	run git checkout -b feature/tagged-branch
+	run git tag new-tag
+	run git checkout feature/test-branch
+	run git checkout new-tag
+	echo "text change" >> a.txt
+
+	run save_stash
+	[ "$status" -eq 0 ]
+	[[ "$output" =~ "this is HEAD branch" ]]
+}
+
 @test "popping stash, laststash not set" {
 	run pop_stash "feature/test-branch"
 	[ "$status" -eq 0 ]
