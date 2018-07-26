@@ -44,7 +44,18 @@ function newstory() {
 
 	# find source branch using $src
 	src=${src:-default}
-	if ! srcBranch="$(get_config "story.source.$src" 2>/dev/null)"; then
+	if [[ "$src" == "current" ]]; then
+		_process "getting current branch"
+		if ! currentBranch="$(get_current_branch 2>&1)"; then
+			_error "could not get current branch ($currentBranch)"
+			return 1
+		fi
+		if ! currentBranchRemote=$(get_tracking_remote_from_branch "$currentBranch"); then
+			_error "could not get current branch's remote ($currentBranchRemote)"
+			return 1
+		fi
+		srcBranch="$currentBranchRemote/$currentBranch"
+	elif ! srcBranch="$(get_config "story.source.$src" 2>/dev/null)"; then
 		srcBranch="$src"
 	fi
 

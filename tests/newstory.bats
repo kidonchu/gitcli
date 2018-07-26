@@ -49,6 +49,26 @@ function teardown() {
 	[ "$output" = "feature/newstory-branch" ]
 }
 
+@test "it should use current branch as source to create new branch" {
+	run git checkout -b feature/source-branch
+	touch b.txt && run git add b.txt
+	git commit -m "Add b.txt"
+	run git push -u upstream feature/source-branch
+
+	run newstory -b feature/newstory-branch -s current
+	[ "$status" -eq 0 ]
+	run git rev-parse --abbrev-ref HEAD
+	[ "$output" = "feature/newstory-branch" ]
+
+	run git checkout feature/test-branch
+	run ls
+	[[ ! "$output" =~ "b.txt" ]]
+
+	run git checkout feature/newstory-branch
+	run ls
+	[[ "$output" =~ "b.txt" ]]
+}
+
 @test "it should push to default remote target after creating a new branch" {
 	run git config story.remotetarget remote1
 	run newstory -b feature/newstory-branch -s upstream/feature/test-branch
