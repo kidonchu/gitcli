@@ -68,6 +68,10 @@ case "${subcmd}" in
 		source ${__srcdir}/renamestory.bash
 		renamestory "$@" || exit 1
 		;;
+	rb | rebase)
+		source ${__srcdir}/rebasestory.bash
+		rebasestory "$@" || exit 1
+		;;
 	*)
 		_gitcli_error "Unsupported subcommand: ${subcmd}"
 		exit 1
