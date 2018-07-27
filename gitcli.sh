@@ -26,7 +26,30 @@ cmd="${1:-}"
 subcmd="${2:-}"
 
 if [[ -z "${cmd}" || -z "${subcmd}" ]]; then
-	echo "usage: ${__base} <command> <subcommand> [-r] [file ...]"
+	echo "usage: git|gitcli story COMMANDS"
+	echo
+	echo "COMMANDS"
+	echo -e "  n | new"
+	echo -e "  s | switch"
+	echo -e "  d | delete"
+	echo -e "  pr | pullrequest"
+	echo -e "  ss | savestash"
+	echo -e "  ps | push"
+	echo -e "  rn | rename"
+	echo -e "  rb | rebase"
+	echo
+	echo "EXAMPLES"
+	echo -e "  ${__base} story new -s|--source default -b|--branch feature/new-story --no-stash"
+	echo -e "  ${__base} story switch -r|--recent"
+	echo -e "  ${__base} story switch -p|--pattern 'some-pattern'"
+	echo -e "  ${__base} story delete -c|--current"
+	echo -e "  ${__base} story delete -p|--pattern 'some-pattern'"
+	echo -e "  ${__base} story pullrequest -s|--source default"
+	echo -e "  ${__base} story savestash"
+	echo -e "  ${__base} story push -r|--remote upstream"
+	echo -e "  ${__base} story rename -b|--breanch feature/renamed-story"
+	echo -e "  ${__base} story rebase -p|--pattern 'some-pattern'"
+	echo -e "  ${__base} story rebase -s|--source default"
 	exit 1
 fi
 
