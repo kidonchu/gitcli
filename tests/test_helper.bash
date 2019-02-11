@@ -11,7 +11,9 @@ function _setup_git() {
 		if [[ -d "$__bare__tmp_dir" ]]; then
 			rm -rf "$__bare__tmp_dir"
 		fi
-		git init "$__tmp_dir" &> /dev/null
+        echo "__tmp_dir:" "$__tmp_dir"
+
+		git init "$__tmp_dir"
 		git clone --bare "$__tmp_dir" "$__bare__tmp_dir"
 		cd "$__tmp_dir" || return
 		git remote add upstream "$__bare__tmp_dir"

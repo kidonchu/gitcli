@@ -8,6 +8,10 @@ context.
 
 gitcli is designed to work well with any git repository.
 
+## Dependencies
+* mapfile --- On MacOS, do `brew install bash` to install mapfile binary
+* bats --- Follow the instructions at https://github.com/sstephenson/bats to run the tests
+
 ## Usages
 
 ### Creating new story

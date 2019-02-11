@@ -21,6 +21,9 @@ __base="$(basename ${__file} .zsh)"
 __root="$__dir"
 __srcdir="${__dir}/src"
 
+# shellcheck source=./utils/message.bash
+source "$__root/src/utils/message.bash"
+
 # command stored in $1, subcommand stored in $2
 cmd="${1:-}"
 subcmd="${2:-}"
@@ -54,7 +57,7 @@ if [[ -z "${cmd}" || -z "${subcmd}" ]]; then
 fi
 
 if [[ "${cmd}" != "s" && "${cmd}" != "story" ]]; then
-	_gitcli_error "Unsupported command: ${cmd}"
+	_error "Unsupported command: ${cmd}"
 	echo "only 'story' command is supported at the moment"
 	exit 1
 fi
@@ -96,7 +99,7 @@ case "${subcmd}" in
 		rebasestory "$@" || exit 1
 		;;
 	*)
-		_gitcli_error "Unsupported subcommand: ${subcmd}"
+		_error "Unsupported subcommand: ${subcmd}"
 		exit 1
 esac
 
