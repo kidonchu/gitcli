@@ -22,7 +22,11 @@ function deletestory() {
 	do
 		case "$1" in
 			-p | --pattern)
-				pattern="$2"
+                if [[ -z "${2:-}" ]]; then
+                    pattern=".*"
+                else
+                    pattern="$2"
+                fi
 				shift
 				;;
 			-c | --current)

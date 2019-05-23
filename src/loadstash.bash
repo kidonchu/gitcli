@@ -1,7 +1,7 @@
 # shellcheck source=./utils/stash.bash
 source "$__root/src/utils/stash.bash"
 
-function savestash() {
+function loadstash() {
 
 	while [ $# -gt 0 ]
 	do
@@ -14,13 +14,13 @@ function savestash() {
 		shift
 	done
 
-	_process "savestash: saving stash"
-	if ! save_stash; then
-		_error "could not save stash for current branch"
+	_process "loadstash: popping stash"
+	if ! pop_stash; then
+		_error "could not load stash for current branch"
 		return 1
 	fi
 }
 
 function print_usage() {
-	echo "usage: gitcli story [ss | savestash]"
+	echo "usage: gitcli story [ps | popstash]"
 }

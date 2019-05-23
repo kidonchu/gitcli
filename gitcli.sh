@@ -86,6 +86,10 @@ case "${subcmd}" in
 		source ${__srcdir}/savestash.bash
 		savestash "$@" || exit 1
 		;;
+    ls | loadstash)
+        source ${__srcdir}/loadstash.bash
+        loadstash "$@" || exit 1
+        ;;
 	ps | push)
 		source ${__srcdir}/pushstory.bash
 		pushstory "$@" || exit 1
