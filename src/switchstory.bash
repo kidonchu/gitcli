@@ -20,6 +20,10 @@ function switchstory() {
 				pattern="${2:-}"
 				shift
 				;;
+			-k | --skip-local)
+				skipLocal=true
+				shift
+				;;
 			-r | --recent)
 				showRecent=true
 				shift
@@ -33,7 +37,7 @@ function switchstory() {
 	done
 
 	if [ ${showRecent:-false} = false ]; then
-		switch_with_pattern "$pattern"
+		switch_with_pattern "$pattern" "${skipLocal:-false}"
 		return $?
 	fi
 
@@ -47,29 +51,14 @@ function switch_with_pattern() {
 		return 1
 	fi
 	pattern="${1}"
+    skipLocal="${2}"
 
-	local branches=()
-	_process "searching for branches with pattern '$pattern'"
-	if ! read -r -a branches <<< "$(get_branches_with_pattern "$pattern")"; then
-		_error "unable to get branches matching pattern '$pattern'"
-		return 1
-	fi
-	
-	if [[ "${#branches[@]}" -eq 0 ]]; then
-		_notice "no branch found that matches the pattern '$pattern'"
-		return 0
-	fi
+    if [[ $skipLocal == "false" ]]; then
+        switch_to_local_branch "$pattern" && return 0
+    fi
 
-	if [[ "${#branches[@]}" -eq 1 ]]; then
-		switch_branch "${branches[0]}" || return 1
-		return 0
-	fi
-
-	choice=$(choose_one "${branches[@]}")
-
-	switch_branch "$choice" || return 1
+    switch_to_remote_branch "$pattern" && return 0
 }
-
 
 function switch_with_recent() {
 
@@ -93,12 +82,62 @@ function switch_with_recent() {
 	switch_branch "$choice" || return 1
 }
 
+function switch_to_local_branch() {
+    local branches=()
+
+    _process "searching for local branches with pattern '$pattern'"
+    if ! read -r -a branches <<< "$(get_branches_with_pattern "$pattern")"; then
+        _error "unable to get local branches matching pattern '$pattern'"
+        return 1
+    fi
+
+    if [[ "${#branches[@]}" -eq 0 ]]; then
+        _notice "no local branch found that matches the pattern '$pattern'"
+        return 1
+    fi
+
+    if [[ "${#branches[@]}" -eq 1 ]]; then
+        switch_branch "${branches[0]}" || return 1
+        return 0
+    fi
+
+    switch_branch $(choose_one "${branches[@]}") || return 1
+}
+
+function switch_to_remote_branch() {
+    local branches=()
+
+    _process "searching for remote branches with pattern '$pattern'"
+    if ! read -r -a branches <<< "$(get_remote_branches_with_pattern "$pattern")"; then
+        _error "unable to get remote branches matching pattern '$pattern'"
+        return 1
+    fi
+
+    if [[ "${#branches[@]}" -eq 0 ]]; then
+        _notice "no remote branch found that matches the pattern '$pattern'"
+        return 1
+    fi
+
+    if [[ "${#branches[@]}" -eq 1 ]]; then
+        local remote=$(get_remote_from_branch ${branches[0]})
+        local targetBranch=${branches[0]#"$remote/"}
+        switch_branch "${targetBranch}" || return 1
+        return 0
+    fi
+
+    local targetBranch=$(choose_one "${branches[@]}")
+    local remote=$(get_remote_from_branch $targetBranch)
+    targetBranch=${targetBranch#"$remote/"}
+
+    switch_branch "${targetBranch}" || return 1
+}
+
 function switch_branch() {
 	if [[ -z "${1:-}" ]]; then
 		_error "no branch specified to switch to"
 		return 1
 	fi
-	 local targetBranch=${1}
+	local targetBranch=${1}
 
 	# save stash for current branch
 	_process "switch_branch: saving stash"
@@ -140,5 +179,5 @@ function switch_branch() {
 }
 
 function print_usage() {
-	echo "usage: gitcli story switch [-r|--recent] [-p|--pattern 'regex_pattern']"
+	echo "usage: gitcli story switch [-r|--recent] [-p|--pattern 'regex_pattern'] [-k|--skip-local]"
 }

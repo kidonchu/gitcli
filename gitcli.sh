@@ -44,7 +44,7 @@ if [[ -z "${cmd}" || -z "${subcmd}" ]]; then
 	echo "EXAMPLES"
 	echo -e "  ${__base} story new -s|--source default -b|--branch feature/new-story --no-stash"
 	echo -e "  ${__base} story switch -r|--recent"
-	echo -e "  ${__base} story switch -p|--pattern 'some-pattern'"
+	echo -e "  ${__base} story switch -p|--pattern 'some-pattern' -k|--skip-local"
 	echo -e "  ${__base} story delete -c|--current"
 	echo -e "  ${__base} story delete -p|--pattern 'some-pattern'"
 	echo -e "  ${__base} story pullrequest -s|--source default"

@@ -41,6 +41,30 @@ function get_branches_with_pattern() {
 	echo "${choices[@]}"
 }
 
+function get_remote_branches_with_pattern() {
+    if [[ -z "${1:-}" ]]; then
+        _error "please specify pattern"
+        return 1
+    fi
+    pattern="${1}"
+
+    mapfile -t branches < <(git branch -r | grep -v '*')
+
+    # trim out spaces
+    for i in "${!branches[@]}"; do
+        branches[i]=$(echo "${branches[$i]}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    done
+
+    choices=()
+    for branch in "${branches[@]}"; do
+        if [[ "$branch" =~ $pattern ]]; then
+            choices+=("$branch")
+        fi
+    done
+
+    echo "${choices[@]}"
+}
+
 function add_recent_branch() {
 	if ! local branchToAdd="${1:-}" || [ -z "$branchToAdd" ]; then
 		_error "please specify branch to add to recent list"
